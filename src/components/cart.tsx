@@ -10,7 +10,9 @@ import {
   CartContainer,
   CloseButton,
   Content,
+  DialogRoot,
   DialogTitle,
+  DialogTrigger,
   FinishButton,
   ImageContainer,
   Overlay,
@@ -54,73 +56,67 @@ const mockCard = [
   },
 ]
 
-interface CartProps {
-  handleCloseDialog: () => void
-}
-
-export function Cart({ handleCloseDialog }: CartProps) {
-  const { items } = useShoppingCart()
+export function Cart() {
+  const { items, removeItem, addItem, subItem, total, finishSessionShop } = useShoppingCart()
   const [quantity, setQuantity] = useState(0)
-  // const amount = items ? items.length : 0
-  console.log('items App', quantity)
-  const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] =
-    useState(false)
+  const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] = useState(false)
+
+  const [open, setOpen] = useState(false)
+
+  function handleCloseDialog() {
+    setOpen(false)
+  }
 
   useEffect(() => {
     setQuantity(items.length)
   }, [items])
 
   async function handleBuyProduct() {
-    try {
-      setIsCreatingCheckoutSession(true)
-      const response = await axios.post('/api/checkout', {
-        // priceId: product.defaultPriceId,
-      })
+    setIsCreatingCheckoutSession(true)
+    await finishSessionShop()
+    setIsCreatingCheckoutSession(false)
+  }
 
-      const { checkoutUrl } = response.data
-
-      window.location.href = checkoutUrl
-    } catch (erro) {
-      setIsCreatingCheckoutSession(false)
-      alert('Falha ao redirecionar a pagina')
+  function handleQuantityChange(e: ChangeEvent<HTMLInputElement>, amountItem: number, id: string) {
+    const numberToChange = parseInt(e.target.value)
+    if (numberToChange === 0) {
+      removeItem(id)
+    } else if (numberToChange > amountItem) {
+      for (let i = amountItem; i < numberToChange; i++) {
+        addItem(id)
+      }
+    } else if (numberToChange < amountItem) {
+      for (let i = amountItem; i > numberToChange; i--) {
+        subItem(id)
+      }
     }
   }
 
-  function handleQuantityChange(e: ChangeEvent<HTMLInputElement>) {
-    // setQuantity(parseInt(e.target.value))
+  function SumQuantityProduct(id: string) {
+    addItem(id)
   }
 
-  function SumQuantityProduct() {
-    // setQuantity((state) => state + 1)
-    // addItem(id)
+  function SubQuantityProduct(id: string) {
+    subItem(id)
   }
 
-  function SubQuantityProduct() {
-    // if (quantity > 1) {
-    //   subItem(id)
-    //   setQuantity((state) => {
-    //     return state - 1
-    //   })
-    // } else {
-    //   removeItem(id)
-    //   setQuantity(0)
-    // }
-  }
-
-  function handleRemoveItem() {
-    // removeItem(id)
+  function handleRemoveItem(id: string) {
+    removeItem(id)
   }
   return (
-    <CartContainer>
-      <ShoppingCartDiv title="Carrinho">
-        <ShoppingCartSimple size={24} color="#202024" weight="bold" />
-      </ShoppingCartDiv>
-      {quantity > 0 && (
-        <QuantityCart>
-          <span>{quantity}</span>
-        </QuantityCart>
-      )}
-
+    <DialogRoot open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <CartContainer>
+          <ShoppingCartDiv title="Carrinho">
+            <ShoppingCartSimple size={24} color="#202024" weight="bold" />
+          </ShoppingCartDiv>
+          {quantity > 0 && (
+            <QuantityCart>
+              <span>{quantity}</span>
+            </QuantityCart>
+          )}
+        </CartContainer>
+      </DialogTrigger>
       <Dialog.Portal>
         <Overlay />
 
@@ -132,7 +128,7 @@ export function Cart({ handleCloseDialog }: CartProps) {
           </CloseButton>
 
           <SpaceCards>
-            {mockCard.map((card) => {
+            {items.map((card) => {
               return (
                 <CardContainer key={card.id}>
                   <ImageContainer>
@@ -143,34 +139,24 @@ export function Cart({ handleCloseDialog }: CartProps) {
                     <h2>{card.price}</h2>
                     <ButtonField>
                       <div>
-                        <Button onClick={SumQuantityProduct}>
-                          <ButtonIconPlus
-                            size={16}
-                            color="#8047F8"
-                            weight="bold"
-                          />
+                        <Button onClick={() => SumQuantityProduct(card.id)}>
+                          <ButtonIconPlus size={16} color="#8047F8" weight="bold" />
                         </Button>
                         <QuantInput
                           placeholder="1"
                           id="QuantInput"
-                          // value={quantity}
-                          onChange={handleQuantityChange}
+                          value={card.amount}
+                          step={1}
+                          min={1}
+                          onChange={(e) => handleQuantityChange(e, card.amount, card.id)}
                         />
-                        <Button onClick={SubQuantityProduct}>
-                          <ButtonIconMinus
-                            size={16}
-                            color="#8047F8"
-                            weight="bold"
-                          />
+                        <Button onClick={() => SubQuantityProduct(card.id)}>
+                          <ButtonIconMinus size={16} color="#8047F8" weight="bold" />
                         </Button>
                       </div>
                       <div>
-                        <Button onClick={handleRemoveItem}>
-                          <ButtonIconRemove
-                            size={16}
-                            color="#8047F8"
-                            weight="bold"
-                          />
+                        <Button onClick={() => handleRemoveItem(card.id)}>
+                          <ButtonIconRemove size={16} color="#8047F8" weight="bold" />
                           <h4>REMOVER</h4>
                         </Button>
                       </div>
@@ -186,22 +172,19 @@ export function Cart({ handleCloseDialog }: CartProps) {
           <Resume>
             <div>
               <h3>Quantidade</h3>
-              <h2>3 itens</h2>
+              <h2>{quantity} itens</h2>
             </div>
             <div>
               <h2>Valor total</h2>
-              <h1>R$ 270,00</h1>
+              <h1>R$ {total}</h1>
             </div>
           </Resume>
 
-          <FinishButton
-            disabled={isCreatingCheckoutSession}
-            onClick={handleBuyProduct}
-          >
+          <FinishButton disabled={isCreatingCheckoutSession} onClick={handleBuyProduct}>
             Finalizar compra
           </FinishButton>
         </Content>
       </Dialog.Portal>
-    </CartContainer>
+    </DialogRoot>
   )
 }

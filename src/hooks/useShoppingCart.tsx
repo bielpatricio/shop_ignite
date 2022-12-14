@@ -1,12 +1,5 @@
-import {
-  ChangeEvent,
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useReducer,
-  useState,
-} from 'react'
+import axios from 'axios'
+import { ChangeEvent, createContext, ReactNode, useContext, useEffect, useReducer, useState } from 'react'
 import {
   addItemAction,
   addNewItemAction,
@@ -24,6 +17,8 @@ interface ShoppingCartContextType {
   removeItem: (id: string) => void
   addItem: (id: string) => void
   subItem: (id: string) => void
+  finishSessionShop: () => void
+  resetAll: () => void
 }
 
 export const ShoppingCartContext = createContext({} as ShoppingCartContextType)
@@ -32,9 +27,7 @@ interface ShoppingCartProviderProps {
   children: ReactNode
 }
 
-export function ShoppingCartContextProvider({
-  children,
-}: ShoppingCartProviderProps) {
+export function ShoppingCartContextProvider({ children }: ShoppingCartProviderProps) {
   const [cartState, dispatch] = useReducer(
     cartReducer,
     {
@@ -42,9 +35,7 @@ export function ShoppingCartContextProvider({
     },
     () => {
       if (typeof window !== 'undefined') {
-        const storedStateAsJSON = localStorage.getItem(
-          '@shop-ignite:cart-State-1.0.0',
-        )
+        const storedStateAsJSON = localStorage.getItem('@shop-ignite:cart-State-1.0.0')
 
         if (storedStateAsJSON) {
           return JSON.parse(storedStateAsJSON)
@@ -57,9 +48,13 @@ export function ShoppingCartContextProvider({
   const { items } = cartState
 
   const total = items.reduce((totalPrice, item) => {
-    // console.log('totalPrice', totalPrice)
-    // console.log('totalPrice Item:', item)
-    return totalPrice + item.amount * item.price
+    // console.log('totalPrice', (item.amount * Number(item.price.replace(/[^0-9.-]+/g, ''))) / 100)
+    // console.log(
+    //   'return ',
+    //   Number.parseFloat(totalPrice + (item.amount * Number(item.price.replace(/[^0-9.-]+/g, ''))) / 100).toFixed(2),
+    // )
+    // console.log('totalPrice Item:', totalPrice + (item.amount * Number(item.price.replace(/[^0-9.-]+/g, ''))) / 100)
+    return totalPrice + (item.amount * Number(item.price.replace(/[^0-9.-]+/g, ''))) / 100
   }, 0)
 
   useEffect(() => {
@@ -67,27 +62,17 @@ export function ShoppingCartContextProvider({
     localStorage.setItem('@shop-ignite:cart-State-1.0.0', stateJSON)
   }, [cartState])
 
-  console.log('itemsss  ', items)
-
   function addNewItem(item: ProductItem) {
     const tryFindItemOnCart = items.find((i) => i.id === item.id)
     if (tryFindItemOnCart) {
       dispatch(sumItemAction(item.id, item.amount))
-      console.log(
-        `${item.amount} qunatidades adicionado no item ${item.name} -> ${item}`,
-      )
     } else {
       dispatch(addNewItemAction(item))
-      console.log('item adicionado no carrinho: ', item)
     }
-    // setTotal((state) => state + item.amount * item.price)
   }
 
   function removeItem(id: string) {
-    // const item = items.find((coff) => coff.id === id)
-    // setTotal((state) => state - item.amount * item.price)
     dispatch(removeItemAction(id))
-    // console.log('item removido do carrinho: ', id)
   }
 
   function resetAll() {
@@ -95,15 +80,33 @@ export function ShoppingCartContextProvider({
   }
 
   function addItem(id: string) {
-    // const item = items.find((coff) => coff.id === id)
-    // setTotal((state) => state + item.price)
     dispatch(addItemAction(id))
   }
 
   function subItem(id: string) {
-    // const item = items.find((coff) => coff.id === id)
-    // setTotal((state) => state - item.price)
     dispatch(subItemAction(id))
+  }
+
+  async function finishSessionShop() {
+    try {
+      const pricesId = items.map((item) => {
+        return {
+          price: item.defaultPriceId,
+          quantity: item.amount,
+        }
+      })
+      const response = await axios.post('/api/checkout', {
+        pricesId,
+      })
+
+      const { checkoutUrl } = response.data
+
+      window.location.href = checkoutUrl
+      resetAll()
+    } catch (erro) {
+      console.log('error', erro)
+      alert(erro)
+    }
   }
 
   return (
@@ -115,6 +118,8 @@ export function ShoppingCartContextProvider({
         removeItem,
         addItem,
         subItem,
+        finishSessionShop,
+        resetAll,
       }}
     >
       {children}

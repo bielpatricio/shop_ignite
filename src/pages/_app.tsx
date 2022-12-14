@@ -34,21 +34,12 @@ import Image from 'next/future/image'
 import Link from 'next/link'
 import { ChangeEvent, useState } from 'react'
 import axios from 'axios'
-import {
-  ShoppingCartContextProvider,
-  useShoppingCart,
-} from '../hooks/useShoppingCart'
+import { ShoppingCartContextProvider, useShoppingCart } from '../hooks/useShoppingCart'
 import { Cart } from '../components/cart'
 
 globalStyles()
 
 export default function App({ Component, pageProps }: AppProps) {
-  const [open, setOpen] = useState(false)
-
-  function handleCloseDialog() {
-    setOpen(false)
-  }
-
   return (
     <Container>
       <ShoppingCartContextProvider>
@@ -56,10 +47,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <Link href={`/`} prefetch={false}>
             <Image src={logoImg.src} width={100} height={100} alt="" />
           </Link>
-          <DialogRoot open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild></DialogTrigger>
-            <Cart handleCloseDialog={handleCloseDialog} />
-          </DialogRoot>
+          <Cart />
         </Header>
         <Component {...pageProps} />
       </ShoppingCartContextProvider>

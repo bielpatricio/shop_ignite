@@ -1,10 +1,6 @@
 import { useRouter } from 'next/router'
 import { GetStaticPaths, GetStaticProps } from 'next'
-import {
-  ImageContainer,
-  ProductContainer,
-  ProductDetail,
-} from '../../styles/pages/product'
+import { ImageContainer, ProductContainer, ProductDetail } from '../../styles/pages/product'
 import { stripe } from '../../lib/stripe'
 import Stripe from 'stripe'
 import Image from 'next/image'
@@ -22,29 +18,13 @@ export default function Product({ product }: ProductProps) {
   const { isFallback } = useRouter()
   const { addNewItem } = useShoppingCart()
 
-  // const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] =
-  //   useState(false)
-
   function handleBuyProduct() {
     // alert(`Camisa com id ${product.defaultPriceId} foi adicionado ao carrinho`)
-    // try {
-    //   setIsCreatingCheckoutSession(true)
-    //   const response = await axios.post('/api/checkout', {
-    //     priceId: product.defaultPriceId,
-    //   })
 
-    //   const { checkoutUrl } = response.data
-
-    //   window.location.href = checkoutUrl
-    // } catch (erro) {
-    //   setIsCreatingCheckoutSession(false)
-    //   alert('Falha ao redirecionar a pagina')
-    // }
     const newItem = {
       ...product,
       amount: 1,
     }
-    console.log('product', newItem)
     addNewItem(newItem)
   }
 
@@ -68,7 +48,7 @@ export default function Product({ product }: ProductProps) {
           <span>{product.price}</span>
           <p>{product.description}</p>
 
-          <button onClick={handleBuyProduct}>Comprar agora</button>
+          <button onClick={handleBuyProduct}>Adicionar no carrinho</button>
         </ProductDetail>
       </ProductContainer>
     </>
@@ -90,9 +70,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   }
 }
 
-export const getStaticProps: GetStaticProps<any, { id: string }> = async ({
-  params,
-}) => {
+export const getStaticProps: GetStaticProps<any, { id: string }> = async ({ params }) => {
   const productId = params.id
   const product = await stripe.products.retrieve(productId, {
     expand: ['default_price'],

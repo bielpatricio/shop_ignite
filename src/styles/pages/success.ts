@@ -44,7 +44,7 @@ export const ImageContainer = styled('div', {
   background: 'linear-gradient(180deg, #1ea483 0%, #7465d4 100%)',
   borderRadius: 8,
   padding: '0.25rem',
-  marginTop: '4rem',
+  marginTop: '2rem',
 
   display: 'flex',
   alignItems: 'center',
@@ -53,4 +53,14 @@ export const ImageContainer = styled('div', {
   img: {
     objectFit: 'cover',
   },
+})
+
+export const ImageDiv = styled('div', {
+  width: '100%',
+  background: 'transparent',
+
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '1rem',
 })

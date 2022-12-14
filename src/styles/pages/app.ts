@@ -22,9 +22,6 @@ export const Header = styled('header', {
 
 export const CartContainer = styled('div', {
   display: 'flex',
-  '&:hover': {
-    cursor: 'pointer',
-  },
 })
 
 export const ImageContainer = styled('div', {
@@ -51,6 +48,10 @@ export const ShoppingCartDiv = styled('div', {
   backgroundColor: '$indigo500',
   borderRadius: 8,
   border: 'none',
+
+  '&:hover': {
+    cursor: 'pointer',
+  },
 })
 
 export const QuantityCart = styled('div', {
@@ -108,8 +109,7 @@ export const Content = styled(Dialog.Content, {
 })
 
 export const FinishButton = styled('button', {
-  background:
-    'linear-gradient(268.7deg, rgba(79, 70, 229, 0.5) 0%, #8257E6 100%, rgba(107, 33, 168, 0.5) 100%)',
+  background: 'linear-gradient(268.7deg, rgba(79, 70, 229, 0.5) 0%, #8257E6 100%, rgba(107, 33, 168, 0.5) 100%)',
   // backgroundColor: '$green500',
   border: 0,
   color: '$white',
@@ -125,8 +125,7 @@ export const FinishButton = styled('button', {
   },
 
   '&:not(:disabled):hover': {
-    background:
-      'linear-gradient(268.7deg, #4F46E5 0%, #8257E6 100%, #6B21A8 100%)',
+    background: 'linear-gradient(268.7deg, #4F46E5 0%, #8257E6 100%, #6B21A8 100%)',
     // backgroundColor: '$green300',
   },
 })
@@ -190,6 +189,7 @@ export const CardContainerInfo = styled('div', {
   flexDirection: 'column',
   justifyContent: 'space-between',
   gap: '0.5rem',
+  width: '100%',
   h2: {
     fontSize: '$md',
     color: '$gray100',
@@ -247,7 +247,7 @@ export const SpaceCards = styled('div', {
   padding: '3rem 0',
 })
 
-export const QuantInput = styled('div', {
+export const QuantInput = styled('input', {
   background: 'transparent',
   height: '2rem',
   border: 0,
