@@ -24,7 +24,7 @@
 
 # About The Project
 
-Challenger project from Ignite ReactJS 2022. To better understand the operation Next.js. In this project was created a hook, used reduce, Stripe and Context. To check how use the Stripe you just need click [here]([https://docs.github.com/pt/rest/guides/getting-started-with-the-rest-api](https://stripe.com/docs/api/checkout/sessions/create)).
+Challenger project from Ignite ReactJS 2022. To better understand the operation Next.js. In this project was created a hook, used reduce, Stripe and Context. To check how use the Stripe you just need click [here](https://stripe.com/docs/api/checkout/sessions/create).
 
 <br>
 
